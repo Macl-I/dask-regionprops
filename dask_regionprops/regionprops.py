@@ -66,6 +66,10 @@ def regionprops_df(
     labels: ArrayLike,
     intensity: ArrayLike | None = None,
     properties: tuple[str, ...] = DEFAULT_PROPERTIES,
+    cache: bool = True, 
+    separator: str = '-',
+    extra_properties = None,
+    spacing = None,
     other_cols: dict[str, float] = {},
 ) -> pd.DataFrame:
     """
@@ -91,7 +95,18 @@ def regionprops_df(
         Dataframe containing the desired properties as columns and each
         labelled region as a row.
     """
-    df = pd.DataFrame(regionprops_table(labels, intensity, properties=properties))
+    df = pd.DataFrame(
+                        regionprops_table(
+                                        labels, 
+                                        intensity, 
+                                        properties=properties, 
+                                        cache=cache, 
+                                        separator=separator, 
+                                        extra_properties=extra_properties, 
+                                        spacing=spacing
+                                        )
+                        )
+    
     for k, v in other_cols.items():
         df[k] = v
     return df
@@ -101,8 +116,12 @@ def regionprops(
     labels: ArrayLike,
     intensity: ArrayLike | None = None,
     properties: tuple[str, ...] = DEFAULT_PROPERTIES,
+    cache: bool = True, 
+    separator: str = '-',
+    extra_properties = None,
+    spacing = None,
     core_dims: tuple[int | str, ...] | None = None,
-) -> dd.DataFrame:
+    ) -> dd.DataFrame:
     """
     Loop over the frames of ds and compute the regionprops for
     each labelled image in each frame.
@@ -149,10 +168,14 @@ def regionprops(
 
         if intensity_arr is not None:
             frame_props = d_regionprops(
-                labels_arr[dims], intensity_arr[dims], properties, other_cols
-            )
+                                        labels_arr[dims], intensity_arr[dims], properties, other_cols, 
+                                        cache=cache, separator=separator, extra_properties=extra_properties, spacing=spacing
+                                        )
         else:
-            frame_props = d_regionprops(labels_arr[dims], None, properties, other_cols)
+            frame_props = d_regionprops(
+                                        labels_arr[dims], None, properties, other_cols,
+                                        cache=cache, separator=separator, extra_properties=extra_properties, spacing=spacing
+                                        )
 
         all_props.append(frame_props)
 
